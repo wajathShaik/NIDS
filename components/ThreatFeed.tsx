@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Threat, Alert, BehavioralData, ThreatHuntResult } from '../types';
@@ -12,11 +11,12 @@ const getSeverityValue = (threat: Threat): number => {
     if ('riskLevel' in threat) { // Is BehavioralData
         return threat.riskLevel === 'Critical' ? 4 : 3;
     }
-    // Is ThreatHuntResult
+    // Is ThreatHuntResult or PenetrationTestResult
     return 3; // Assume high
 }
 
 const getThreatDetails = (threat: Threat) => {
+    const id = threat.id;
     if ('attack_type' in threat) { // Alert
         return {
             title: threat.attack_type,
@@ -31,11 +31,25 @@ const getThreatDetails = (threat: Threat) => {
             severity: threat.riskLevel
         };
     }
-    // ThreatHuntResult
+    if (threat.type === 'ThreatHuntResult') {
+        return {
+            title: threat.name,
+            subtitle: threat.query,
+            severity: 'High' as const
+        };
+    }
+    if (threat.type === 'PenetrationTestResult') {
+        return {
+            title: `Pentest: ${threat.targetDomain}`,
+            subtitle: `${threat.vulnerabilities.length} vulns found`,
+            severity: 'High' as const
+        };
+    }
+    // Fallback
     return {
-        title: threat.name,
-        subtitle: threat.query,
-        severity: 'High' as const
+        title: 'Unknown Threat',
+        subtitle: `ID: ${id}`,
+        severity: 'Low' as const
     };
 };
 

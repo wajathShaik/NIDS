@@ -99,6 +99,7 @@ export enum LogAction {
     HUNT_UPDATED = 'Threat Hunt Updated',
     HUNT_DELETED = 'Threat Hunt Deleted',
     HUNT_ESCALATED = 'Threat Hunt Escalated to Investigation',
+    PENTEST_ESCALATED = 'Penetration Test Escalated to Investigation',
 }
 
 export interface LogEntry {
@@ -139,16 +140,17 @@ export interface TimelineEvent {
     timestamp: string;
     title: string;
     description: string;
-    type: 'alert' | 'log' | 'note' | 'evidence' | 'behavior' | 'hunt';
+    type: 'alert' | 'log' | 'note' | 'evidence' | 'behavior' | 'hunt' | 'pentest';
     author: string; // user email
 }
 
 export interface EvidenceFile {
     id: string;
     name: string;
-    type: string; // e.g., 'pcap', 'log', 'screenshot'
+    type: string; // e.g., 'pcap', 'log', 'screenshot', 'report', 'script'
     addedBy: string; // user email
     timestamp: string;
+    content?: string;
 }
 
 export interface BehavioralData {
@@ -179,8 +181,35 @@ export interface ThreatHuntResult {
     createdAt: string; // when escalated
 }
 
+export interface ReconData {
+    subdomains: string[];
+    open_ports: { port: number; service: string; description: string; }[];
+    technologies: { name: string; category: string; }[];
+    potential_vulnerabilities: string[];
+}
+export interface Vulnerability {
+    cve_id: string;
+    severity: 'Critical' | 'High' | 'Medium' | 'Low' | 'Informational';
+    description: string;
+    recommendation: string;
+}
+export interface ExploitScript {
+    cve_id: string;
+    script: string;
+}
 
-export type Threat = Alert | BehavioralData | ThreatHuntResult;
+export interface PenetrationTestResult {
+    id: string;
+    type: 'PenetrationTestResult';
+    targetDomain: string;
+    reconData: ReconData;
+    vulnerabilities: Vulnerability[];
+    exploitScripts: ExploitScript[];
+    finalReport: string;
+    createdAt: string;
+}
+
+export type Threat = Alert | BehavioralData | ThreatHuntResult | PenetrationTestResult;
 
 export interface Investigation {
     id: string;

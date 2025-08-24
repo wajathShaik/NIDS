@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Threat, Alert, BehavioralData, ThreatHuntResult } from '../types';
@@ -27,12 +26,13 @@ const getSeverityValue = (threat: Threat): number => {
             default: return 0;
         }
     }
-    // ThreatHuntResult
+    // ThreatHuntResult or PenetrationTestResult
     return 3; // Assume escalated hunts are High severity
 }
 
 const ThreatItem: React.FC<{ threat: Threat, onInvestigate: (threat: Threat) => void, correlatedThreats: Threat[] }> = ({ threat, onInvestigate, correlatedThreats }) => {
     const getDetails = (t: Threat) => {
+        const id = t.id;
         if ('attack_type' in t) { // Alert
             return {
                 title: `${t.attack_type} Event`,
@@ -47,12 +47,22 @@ const ThreatItem: React.FC<{ threat: Threat, onInvestigate: (threat: Threat) => 
                 severity: t.riskLevel,
             };
         }
-        // ThreatHuntResult
-        return {
-            title: `Threat Hunt: "${t.name}"`,
-            subtitle: `Query: ${t.query}`,
-            severity: 'High' as const,
-        };
+        if (t.type === 'ThreatHuntResult') {
+            return {
+                title: `Threat Hunt: "${t.name}"`,
+                subtitle: `Query: ${t.query}`,
+                severity: 'High' as const,
+            };
+        }
+        if (t.type === 'PenetrationTestResult') {
+            return {
+                title: `Pentest Result: ${t.targetDomain}`,
+                subtitle: `${t.vulnerabilities.length} vulnerabilities found`,
+                severity: 'High' as const,
+            };
+        }
+        // This should be unreachable if Threat is exhaustive.
+        return { title: 'Unknown Threat', subtitle: `ID: ${id}`, severity: 'Low' as const };
     };
 
     const { title, subtitle, severity } = getDetails(threat);

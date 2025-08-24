@@ -9,6 +9,7 @@ import { getInvestigationInsights, generateInvestigationReport } from '../servic
 import { RefreshIcon, TrashIcon, TimelineIcon, EvidenceIcon, ReportIcon, ClipboardListIcon } from '../components/icons';
 import InvestigationTimeline from '../components/InvestigationTimeline';
 import ReportModal from '../components/ReportModal';
+import EvidenceViewerModal from '../components/EvidenceViewerModal';
 
 
 const statusColorMap: Record<InvestigationStatus, string> = {
@@ -28,6 +29,9 @@ const getThreatDescription = (threat: Threat) => {
     }
     if (threat.type === 'ThreatHuntResult') {
         return `Source: <strong class="text-white">Threat Hunt</strong> - <span class="font-mono">"${threat.name}"</span>`;
+    }
+    if (threat.type === 'PenetrationTestResult') {
+        return `Source: <strong class="text-white">Penetration Test</strong> on <span class="font-mono">"${threat.targetDomain}"</span>`;
     }
     return 'Unknown Threat Type';
 };
@@ -102,6 +106,7 @@ const InvestigationWorkbenchPage: React.FC = () => {
     const [timelineNote, setTimelineNote] = useState('');
     const [evidenceName, setEvidenceName] = useState('');
     const [evidenceType, setEvidenceType] = useState('log');
+    const [viewingEvidence, setViewingEvidence] = useState<EvidenceFile | null>(null);
 
     // Reporting State
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -268,6 +273,7 @@ const InvestigationWorkbenchPage: React.FC = () => {
     return (
         <div className="space-y-6">
              <ReportModal isOpen={isReportModalOpen} onClose={() => setIsReportModalOpen(false)} reportContent={reportContent} />
+             {viewingEvidence && <EvidenceViewerModal evidence={viewingEvidence} onClose={() => setViewingEvidence(null)} />}
             <div className="content-panel p-6 flex justify-between items-start">
                 <div>
                     <h1 className="text-3xl font-semibold text-white">Investigation: <span className="font-mono text-blue-400">{investigation.id}</span></h1>
@@ -348,9 +354,14 @@ const InvestigationWorkbenchPage: React.FC = () => {
                                 <h2 className="text-xl font-semibold mb-4">Evidence Locker</h2>
                                 <div className="space-y-2">
                                     {investigation.evidence.length > 0 ? investigation.evidence.map(e => (
-                                        <div key={e.id} className="bg-gray-700/50 p-3 rounded-lg">
-                                            <p className="font-semibold text-white">{e.name}</p>
-                                            <p className="text-sm text-gray-400">Type: {e.type} | Added by {e.addedBy} at {new Date(e.timestamp).toLocaleTimeString()}</p>
+                                        <div key={e.id} className="bg-gray-700/50 p-3 rounded-lg flex justify-between items-center">
+                                            <div>
+                                                <p className="font-semibold text-white font-mono">{e.name}</p>
+                                                <p className="text-sm text-gray-400">Type: {e.type} | Added by {e.addedBy} at {new Date(e.timestamp).toLocaleTimeString()}</p>
+                                            </div>
+                                            {e.content && (
+                                                <button onClick={() => setViewingEvidence(e)} className="text-blue-400 hover:underline text-sm font-semibold">View</button>
+                                            )}
                                         </div>
                                     )) : <p className="text-gray-400">No evidence has been added.</p>}
                                 </div>

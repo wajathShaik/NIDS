@@ -1,5 +1,7 @@
 
 
+
+
 import { BellIcon } from './BellIcon';
 import { ShieldIcon } from './ShieldIcon';
 import { ServerIcon } from './ServerIcon';
@@ -31,6 +33,8 @@ import { TargetIcon } from './TargetIcon';
 import { ChevronLeftIcon } from './ChevronLeftIcon';
 import { ChevronRightIcon } from './ChevronRightIcon';
 import { FlaskIcon } from './FlaskIcon';
+import { PentagonIcon } from './PentagonIcon';
+import { TerminalIcon } from './TerminalIcon';
 
 
 export { 
@@ -65,4 +69,6 @@ export {
     ChevronLeftIcon,
     ChevronRightIcon,
     FlaskIcon,
+    PentagonIcon,
+    TerminalIcon,
 };

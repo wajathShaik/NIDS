@@ -31,11 +31,14 @@ export const investigationService = {
         let initialTimelineEvent: TimelineEvent;
         let logDetails: string;
         let initialNotes: string;
+        let initialEvidence: EvidenceFile[] = [];
         
+        const timestamp = new Date();
+
         if ('attack_type' in threat) { // It's an Alert
             initialTimelineEvent = {
-                id: `t-evt-${Date.now()}`,
-                timestamp: new Date().toISOString(),
+                id: `t-evt-${timestamp.getTime()}`,
+                timestamp: timestamp.toISOString(),
                 type: 'alert',
                 title: `Initial Alert: ${threat.attack_type}`,
                 description: `Severity: ${threat.severity}, Source: ${threat.src_ip}, Destination: ${threat.dst_ip}`,
@@ -45,8 +48,8 @@ export const investigationService = {
             initialNotes = `Initial investigation created for network alert.`;
         } else if ('riskLevel' in threat) { // It's BehavioralData
             initialTimelineEvent = {
-                id: `t-evt-${Date.now()}`,
-                timestamp: new Date().toISOString(),
+                id: `t-evt-${timestamp.getTime()}`,
+                timestamp: timestamp.toISOString(),
                 type: 'behavior',
                 title: `Behavioral Anomaly: ${threat.riskLevel} Risk`,
                 description: `User: ${threat.userEmail}, Anomalies: ${threat.anomalies.join(', ')}`,
@@ -54,10 +57,10 @@ export const investigationService = {
             };
             logDetails = `Started investigation for Behavioral Threat ID: ${threat.id} (User: ${threat.userEmail})`;
             initialNotes = `Initial investigation created for behavioral anomaly.`;
-        } else { // It's a ThreatHuntResult
+        } else if (threat.type === 'ThreatHuntResult') { // It's a ThreatHuntResult
              initialTimelineEvent = {
-                id: `t-evt-${Date.now()}`,
-                timestamp: new Date().toISOString(),
+                id: `t-evt-${timestamp.getTime()}`,
+                timestamp: timestamp.toISOString(),
                 type: 'hunt',
                 title: `Escalated from Threat Hunt: ${threat.name}`,
                 description: `Query: ${threat.query}`,
@@ -65,15 +68,58 @@ export const investigationService = {
             };
             logDetails = `Started investigation from Threat Hunt: ${threat.name}`;
             initialNotes = `Investigation created from Threat Hunt "${threat.name}".\n\nInitial Findings:\n${threat.findings}`;
+        } else if (threat.type === 'PenetrationTestResult') { // It's a PenetrationTestResult
+            const formattedTimestamp = timestamp.toISOString().replace(/[:.]/g, '-');
+            const baseFileName = `${threat.targetDomain}_${formattedTimestamp}`;
+
+            initialTimelineEvent = {
+                id: `t-evt-${timestamp.getTime()}`,
+                timestamp: timestamp.toISOString(),
+                type: 'pentest',
+                title: `Pentest Escalated: ${threat.targetDomain}`,
+                description: `Penetration test results for ${threat.targetDomain} escalated to a full investigation.`,
+                author: user.email,
+            };
+            logDetails = `Started investigation from Penetration Test on ${threat.targetDomain}`;
+            initialNotes = `Investigation created from the Penetration Testing Toolkit for the target domain: ${threat.targetDomain}.\n\nReview the attached evidence for the full report and findings.`;
+            
+            initialEvidence = [
+                {
+                    id: `evd-${timestamp.getTime()}-report`,
+                    name: `${baseFileName}_Report.md`,
+                    type: 'report',
+                    addedBy: user.email,
+                    timestamp: timestamp.toISOString(),
+                    content: threat.finalReport,
+                },
+                ...threat.exploitScripts.map((script, index) => ({
+                     id: `evd-${timestamp.getTime()}-script-${index}`,
+                     name: `${baseFileName}_Exploit_${script.cve_id}.py`,
+                     type: 'script',
+                     addedBy: user.email,
+                     timestamp: timestamp.toISOString(),
+                     content: script.script,
+                })),
+                {
+                     id: `evd-${timestamp.getTime()}-rawdata`,
+                     name: `${baseFileName}_RawData.json`,
+                     type: 'log',
+                     addedBy: user.email,
+                     timestamp: timestamp.toISOString(),
+                     content: JSON.stringify({ recon: threat.reconData, vulnerabilities: threat.vulnerabilities }, null, 2),
+                }
+            ];
+        } else {
+             throw new Error("Unknown threat type provided to createInvestigation");
         }
 
 
         const newInvestigation: Investigation = {
-            id: `case-${Date.now()}`,
+            id: `case-${timestamp.getTime()}`,
             primaryThreat: threat,
             team: [{ id: user.id, email: user.email }],
             status: InvestigationStatus.Open,
-            startTime: new Date().toISOString(),
+            startTime: timestamp.toISOString(),
             checklist: {
                 triage: { severityConfirmed: false, checkedForFalsePositives: false },
                 correlation: { foundRelatedEvents: false, correlatedWithAuditLogs: false },
@@ -82,7 +128,7 @@ export const investigationService = {
             },
             notes: initialNotes,
             timeline: [initialTimelineEvent],
-            evidence: [],
+            evidence: initialEvidence,
         };
 
         investigations.unshift(newInvestigation);

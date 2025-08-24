@@ -1,5 +1,9 @@
 
 
+
+
+
+
 import React from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { Role } from '../types';
@@ -14,6 +18,8 @@ import {
     BrainCircuitIcon,
     DroneIcon,
     QuantumLockIcon,
+    PentagonIcon,
+    TerminalIcon,
 } from '../components/icons';
 
 const ToolsPage: React.FC = () => {
@@ -33,6 +39,20 @@ const ToolsPage: React.FC = () => {
             icon: <UploadIcon className="h-8 w-8 text-white" />,
             link: '/log-ingestion',
             allowedRoles: [Role.Admin, Role.SecurityManager, Role.SeniorAnalyst],
+        },
+        {
+            title: 'Penetration Testing',
+            description: 'Simulate attacks and generate vulnerability reports with an AI-powered toolkit.',
+            icon: <PentagonIcon className="h-8 w-8 text-white" />,
+            link: '/penetration-testing',
+            allowedRoles: [Role.Admin, Role.SecurityManager, Role.SeniorAnalyst],
+        },
+        {
+            title: 'Virtual SOC Workbench',
+            description: 'Run simulated scans using AI-powered versions of famous tools like Nmap, Nessus, and Wireshark.',
+            icon: <TerminalIcon className="h-8 w-8 text-white" />,
+            link: '/virtual-soc-workbench',
+            allowedRoles: [Role.Admin, Role.SecurityManager, Role.SeniorAnalyst, Role.Analyst],
         },
         {
             title: 'Behavioral Analytics',

@@ -1,6 +1,9 @@
 
 
 
+
+
+
 import React, { useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
@@ -32,6 +35,8 @@ import PlatformSecurityPage from './pages/PlatformSecurityPage';
 import ThreatCenterPage from './pages/ThreatCenterPage';
 import AnimatedBackground from './components/AnimatedBackground';
 import ThreatHuntingPage from './pages/ThreatHuntingPage';
+import PenetrationTestingPage from './pages/PenetrationTestingPage';
+import VirtualSocWorkbenchPage from './pages/VirtualSocWorkbenchPage';
 
 
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -175,6 +180,20 @@ const App: React.FC = () => {
                 </AppLayout>
               </ProtectedRoute>
             } />
+             <Route path="/penetration-testing" element={
+                <ProtectedRoute roles={[Role.Admin, Role.SecurityManager, Role.SeniorAnalyst]}>
+                    <AppLayout>
+                        <PenetrationTestingPage />
+                    </AppLayout>
+                </ProtectedRoute>
+             } />
+             <Route path="/virtual-soc-workbench" element={
+                <ProtectedRoute roles={analystRoles}>
+                    <AppLayout>
+                        <VirtualSocWorkbenchPage />
+                    </AppLayout>
+                </ProtectedRoute>
+             } />
             <Route path="/drone-security" element={
               <ProtectedRoute roles={[Role.Admin, Role.SecurityManager]}>
                 <AppLayout>
