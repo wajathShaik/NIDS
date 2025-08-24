@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NIDS-XAI Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'gray-900': '#0d1117',
+              'gray-800': '#161b22',
+              'gray-700': '#21262d',
+              'gray-600': '#30363d',
+              'gray-500': '#48515c',
+              'gray-400': '#8b949e',
+              'blue-500': '#58a6ff',
+              'blue-600': '#388bfd',
+              'violet-500': '#a371f7',
+              'cyan-500': '#76e3ea',
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            animation: {
+                glow: 'glow 2s ease-in-out infinite alternate',
+                'border-pulse': 'border-pulse 4s ease-in-out infinite',
+            },
+            keyframes: {
+                glow: {
+                    '0%': { boxShadow: '0 0 5px #58a6ff, 0 0 10px #58a6ff' },
+                    '100%': { boxShadow: '0 0 20px #58a6ff, 0 0 30px #58a6ff' },
+                },
+                'border-pulse': {
+                  '0%': { borderColor: 'rgba(88, 166, 255, 0.3)' },
+                  '50%': { borderColor: 'rgba(163, 113, 247, 0.7)' },
+                  '100%': { borderColor: 'rgba(88, 166, 255, 0.3)' },
+                }
+            },
+          },
+        },
+      }
+    </script>
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+    <style>
+      :root {
+        --color-bg: #0d1117;
+        --color-border: rgba(48, 54, 61, 0.8);
+        --color-glow-edge: rgba(88, 166, 255, 0.5);
+        --color-glow-pulse: #58a6ff;
+        --font-smoothing: antialiased;
+        --material-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      }
+      
+      body {
+        -webkit-font-smoothing: var(--font-smoothing);
+        -moz-osx-smoothing: grayscale;
+        background-color: var(--color-bg);
+      }
+
+      /* --- Frosted Glass Material System --- */
+      /* Base properties for all material panes */
+      .material-ultra-thin, .material-thin, .material-regular, .material-thick, .material-ultra-thick, .content-panel, .holographic-card {
+        border: 1px solid var(--color-border);
+        box-shadow: var(--material-shadow);
+      }
+
+      .material-ultra-thin {
+        background-color: rgba(22, 27, 34, 0.65);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
+      .material-thin {
+        background-color: rgba(22, 27, 34, 0.75);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+      }
+      .material-regular {
+        background-color: rgba(22, 27, 34, 0.8);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+      .material-thick {
+        background-color: rgba(22, 27, 34, 0.85);
+        backdrop-filter: blur(30px);
+        -webkit-backdrop-filter: blur(30px);
+      }
+      .material-ultra-thick {
+        background-color: rgba(22, 27, 34, 0.9);
+        backdrop-filter: blur(40px);
+        -webkit-backdrop-filter: blur(40px);
+      }
+      
+      .content-panel {
+        background-color: rgba(22, 27, 34, 0.8);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+
+      /* Accessibility Fallback for Reduced Transparency (HIGH CONTRAST) */
+      @media (prefers-reduced-transparency: reduce) {
+        .material-ultra-thin,
+        .material-thin,
+        .material-regular,
+        .material-thick,
+        .material-ultra-thick,
+        .content-panel,
+        .holographic-card {
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
+        }
+        /* New distinct, high-contrast fallback colors */
+        .material-ultra-thin { background-color: #161b22 !important; } /* gray-800 */
+        .material-thin { background-color: #1a2028 !important; }
+        .material-regular, .content-panel { background-color: #21262d !important; } /* gray-700 */
+        .holographic-card { background: #21262d !important; } /* gray-700 */
+        .material-thick { background-color: #30363d !important; } /* gray-600 */
+        .material-ultra-thick { background-color: #48515c !important; } /* gray-500 */
+      }
+      
+      .holographic-card {
+        position: relative;
+        background: radial-gradient(circle at 100% 0%, rgba(88, 166, 255, 0.15), transparent 40%), 
+                    radial-gradient(circle at 0% 100%, rgba(163, 113, 247, 0.15), transparent 40%),
+                    rgba(22, 27, 34, 0.8);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        border-color: rgba(88, 166, 255, 0.3);
+        animation: border-pulse 4s ease-in-out infinite;
+      }
+
+      .holographic-card:hover {
+        border-color: var(--color-glow-edge);
+        box-shadow: 0 0 20px var(--color-glow-edge), 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        transform: translateY(-5px) scale(1.02);
+      }
+
+      .glow-pulse-text {
+        animation: glow-pulse 1.5s infinite alternate;
+      }
+
+      @keyframes glow-pulse {
+        from { text-shadow: 0 0 4px var(--color-glow-pulse); }
+        to { text-shadow: 0 0 12px var(--color-glow-pulse), 0 0 20px var(--color-glow-pulse); }
+      }
+      
+      .breathing-glow {
+        animation: breathing-glow 2.5s ease-in-out infinite;
+      }
+      @keyframes breathing-glow {
+        0%, 100% { box-shadow: 0 0 15px rgba(88, 166, 255, 0.5); }
+        50% { box-shadow: 0 0 25px rgba(88, 166, 255, 0.8), 0 0 40px rgba(88, 166, 255, 0.5); }
+      }
+
+      .highlight-row {
+        animation: highlight-row 2.5s ease-out forwards;
+      }
+      @keyframes highlight-row {
+        0% { background-color: rgba(34, 197, 94, 0.3); }
+        100% { background-color: transparent; }
+      }
+
+      @keyframes fade-in-scale {
+        0% { opacity: 0; transform: scale(.95); }
+        100% { opacity: 1; transform: scale(1); }
+      }
+      .animate-fade-in-scale {
+        animation: fade-in-scale 0.3s ease-out forwards;
+      }
+
+      /* Accessibility: Enhanced Focus Ring */
+      :focus-visible {
+        outline: 2px solid var(--color-glow-pulse) !important;
+        outline-offset: 2px;
+        border-radius: 4px;
+        box-shadow: 0 0 10px var(--color-glow-edge);
+      }
+
+      /* Print styles for Report Modal */
+      @media print {
+        body * {
+          visibility: hidden;
+        }
+        #printable-report, #printable-report * {
+          visibility: visible;
+        }
+        #printable-report {
+          position: fixed;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: auto;
+          overflow: visible;
+          background: white;
+          padding: 2rem;
+          color: black !important;
+        }
+         #printable-report * {
+          color: black !important;
+        }
+      }
+      
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.1.1/",
+    "react": "https://esm.sh/react@^19.1.1",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.1/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.15.0",
+    "recharts": "https://esm.sh/recharts@^3.1.2",
+    "react-router-dom": "https://esm.sh/react-router-dom@6",
+    "react-router-dom/server": "https://esm.sh/react-router-dom@6/server"
+  }
+}
+</script>
+</head>
+  <body class="bg-gray-900 text-gray-200">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

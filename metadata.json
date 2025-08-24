@@ -1,0 +1,8 @@
+{
+  "name": "NIDS-XAI Enterprise Security Platform",
+  "description": "An enterprise-level Network Intrusion Detection System and security management platform. Features include Explainable AI (XAI) analysis, a multi-tiered role-based access control (RBAC) system, admin-managed user approval workflows, and simulated log file ingestion.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
